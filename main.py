@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
 
+import aiohttp
 import discord
 import slash_util
 
@@ -31,6 +32,7 @@ cogs = ['jishaku',
 class Thunder(slash_util.Bot):
     def __init__(self):
         super().__init__(command_prefix=['t!'], allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
         for cog in cogs:
             self.load_extension(cog)
 

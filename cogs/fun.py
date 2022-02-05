@@ -15,11 +15,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import io
 import math
 import random
+from typing import Literal
 
 import discord
 import slash_util
+import yarl
 
 MAX_CHILL_TEMP = -50
 MAX_WARM_TEMP = 100
@@ -109,6 +112,28 @@ class Fun(slash_util.Cog):
               "request and immediately block him. Our team is "\
               "currently working very hard to remove this user from our database, please stay safe."
         await ctx.send(msg)
+
+    @slash_util.slash_command()
+    @slash_util.describe(member="The member to eject", color="The color of the crewmate",
+                         impostor="Whether the member is an impostor or not")
+    async def eject(self, ctx: slash_util.Context, member: discord.Member, 
+                    color: Literal['black', 'blue', 'brown', 'cyan', 'darkgreen', 'lime', 'orange', 'pink', 'purple', \
+                         'red', 'white', 'yellow'], impostor: bool = False):
+        """amogus"""
+        url = yarl.URL.build(scheme="https", host="vacefron.nl", path="/api/ejected",
+                             query={'name': member.display_name, 'crewmate': color, 'impostor': str(impostor)})
+        req = await self.bot.session.get(url)
+
+        if req.status != 200:
+            await ctx.send("Sorry, /eject is working. Try again later(?)")
+            return
+
+        _bytes = await req.read()
+        tmp = io.BytesIO(_bytes)
+        tmp.seek(0)
+
+        await ctx.defer()
+        await ctx.send(file=discord.File(tmp, "eject.png"))
 
 def setup(bot):
     bot.add_cog(Fun(bot))
