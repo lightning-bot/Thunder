@@ -1,0 +1,3 @@
+git+https://github.com/LightSage/discord.py@master
+slash-util==1.2
+jishaku
