@@ -125,7 +125,7 @@ class Fun(slash_util.Cog):
         req = await self.bot.session.get(url)
 
         if req.status != 200:
-            await ctx.send("Sorry, /eject is working. Try again later(?)")
+            await ctx.send("Sorry, /eject is not working. Try again later(?)")
             return
 
         _bytes = await req.read()

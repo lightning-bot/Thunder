@@ -19,10 +19,10 @@ import discord
 import slash_util
 from discord.ext import commands
 
+import config
+
 
 class Stats(slash_util.Cog):
-    def __init__(self, bot) -> None:
-        self.bot = bot
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
@@ -35,7 +35,7 @@ class Stats(slash_util.Cog):
             humans = guild.member_count - bots
             embed.add_field(name='Member Count', value=f"Bots: {bots}\nHumans: {humans}\nTotal: {len(guild.members)}")
 
-        channel = self.bot.get_channel(732981357747241009)
+        channel = self.bot.get_channel(config.GUILD_STATUS_CHANNEL)
         await channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -49,7 +49,7 @@ class Stats(slash_util.Cog):
             humans = guild.member_count - bots
             embed.add_field(name='Member Count', value=f"Bots: {bots}\nHumans: {humans}\nTotal: {len(guild.members)}")
 
-        channel = self.bot.get_channel(732981357747241009)
+        channel = self.bot.get_channel(config.GUILD_STATUS_CHANNEL)
         await channel.send(embed=embed)
 
     @slash_util.slash_command()
