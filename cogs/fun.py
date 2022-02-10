@@ -133,7 +133,6 @@ class Fun(slash_util.Cog):
         tmp = io.BytesIO(_bytes)
         tmp.seek(0)
 
-        await ctx.defer()
         await ctx.send(file=discord.File(tmp, "eject.png"))
 
     async def make_json_request(self, ctx, url):
