@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import io
 import math
 import random
+from datetime import datetime
 from typing import Literal
 
 import discord
@@ -134,6 +135,38 @@ class Fun(slash_util.Cog):
 
         await ctx.defer()
         await ctx.send(file=discord.File(tmp, "eject.png"))
+
+    async def make_json_request(self, ctx, url):
+        req = await self.bot.session.get(url)
+
+        if req.status != 200:
+            await ctx.send(f"Sorry, /{ctx.command.name} is not working. Try again later(?)")
+            return
+        
+        return await req.json()
+
+    @slash_util.slash_command()
+    async def xkcd(self, ctx: slash_util.Context, value: int = None):
+        """Displays an xkcd"""
+        xkcd_latest = await self.make_json_request(ctx, "https://xkcd.com/info.0.json")
+
+        xkcd_max = xkcd_latest.get("num")
+
+        if value is not None and value > 0 and value < xkcd_max:
+            entry = value
+        else:
+            entry = xkcd_max
+
+        xkcd = await self.make_json_request(ctx, f"https://xkcd.com/{entry}/info.0.json")
+
+        timestamp = datetime.strptime(f"{xkcd['year']}-{xkcd['month']}-{xkcd['day']}",
+                                      "%Y-%m-%d")
+        embed = discord.Embed(title=f"xkcd {xkcd['num']}: {xkcd['safe_title']}",
+                              url=f"https://xkcd.com/{xkcd['num']}",
+                              timestamp=timestamp, color=discord.Color(0x96A8C8))
+        embed.set_image(url=xkcd["img"])
+        embed.set_footer(text=xkcd["alt"])
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Fun(bot))
