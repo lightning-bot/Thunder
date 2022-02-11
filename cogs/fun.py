@@ -167,5 +167,29 @@ class Fun(slash_util.Cog):
         embed.set_footer(text=xkcd["alt"])
         await ctx.send(embed=embed)
 
+    @slash_util.slash_command()
+    async def slap(self, ctx: slash_util.Context, member: discord.Member):
+        """Slaps someone"""
+        resp = await self.make_json_request(ctx, "https://nekos.life/api/v2/img/slap")
+        embed = discord.Embed(title=f"{ctx.author.display_name} slapped {member.display_name}")
+        embed.set_image(url=resp['url'])
+        await ctx.send(embed=embed)
+
+    @slash_util.slash_command()
+    async def hug(self, ctx: slash_util.Context, member: discord.Member):
+        """Hugs someone"""
+        resp = await self.make_json_request(ctx, "https://nekos.life/api/v2/img/hug")
+        embed = discord.Embed(title=f"{ctx.author.display_name} hugs {member.display_name}")
+        embed.set_image(url=resp['url'])
+        await ctx.send(embed=embed)
+
+    @slash_util.slash_command()
+    async def pat(self, ctx: slash_util.Context, member: discord.Member):
+        """Pats someone"""
+        resp = await self.make_json_request(ctx, "https://nekos.life/api/v2/img/pat")
+        embed = discord.Embed(title=f"{ctx.author.display_name} pats {member.display_name}")
+        embed.set_image(url=resp['url'])
+        await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(Fun(bot))
