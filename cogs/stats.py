@@ -28,7 +28,7 @@ class Stats(slash_util.Cog):
     async def on_guild_join(self, guild: discord.Guild):
         embed = discord.Embed(title="Guild Join", color=discord.Color.blue())
         owner = await self.bot.fetch_user(guild.owner_id) or "Unknown User"
-        embed.description = f"**ID**: {guild.id}\n**Owner**: {str(owner)} ({guild.owner_id})"
+        embed.description = f"**Name**: {guild.name}\n**ID**: {guild.id}\n**Owner**: {str(owner)} ({guild.owner_id})"
 
         if hasattr(guild, 'members'):
             bots = sum(member.bot for member in guild.members)
@@ -42,7 +42,7 @@ class Stats(slash_util.Cog):
     async def on_guild_remove(self, guild: discord.Guild):
         embed = discord.Embed(title="Guild Leave", color=discord.Color.red())
         owner = await self.bot.fetch_user(guild.owner_id) or "Unknown User"
-        embed.description = f"**ID**: {guild.id}\n**Owner**: {str(owner)} ({guild.owner_id})"
+        embed.description = f"**Name**: {guild.name}\n**ID**: {guild.id}\n**Owner**: {str(owner)} ({guild.owner_id})"
 
         if hasattr(guild, 'members'):
             bots = sum(member.bot for member in guild.members)
