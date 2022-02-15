@@ -121,6 +121,8 @@ class Fun(slash_util.Cog):
                     color: Literal['black', 'blue', 'brown', 'cyan', 'darkgreen', 'lime', 'orange', 'pink', 'purple', \
                          'red', 'white', 'yellow'], impostor: bool = False):
         """amogus"""
+        await ctx.defer()
+
         url = yarl.URL.build(scheme="https", host="vacefron.nl", path="/api/ejected",
                              query={'name': member.display_name, 'crewmate': color, 'impostor': str(impostor)})
         req = await self.bot.session.get(url)
