@@ -27,7 +27,8 @@ logging.basicConfig(level="INFO")
 
 cogs = ['jishaku',
         'cogs.fun',
-        'cogs.stats']
+        'cogs.stats',
+        'cogs.imagegen']
 
 class Thunder(slash_util.Bot):
     def __init__(self):
