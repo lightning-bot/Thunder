@@ -27,6 +27,22 @@ import yarl
 
 MAX_CHILL_TEMP = -50
 MAX_WARM_TEMP = 100
+BAIT = ["https://i.imgur.com/5VKDzO6.png",
+        "https://i.imgur.com/28hcpAL.png",
+        "https://i.imgur.com/bb2QhRT.png",
+        "https://i.imgur.com/coTPufb.png",
+        "https://i.imgur.com/AXnYOuW.png",
+        "https://i.imgur.com/QcxVJGB.png",
+        "https://i.imgur.com/yedHnzp.png",
+        "https://i.imgur.com/j98dUfd.jpg",
+        "https://i.imgur.com/UKiDbzb.png",
+        "https://i.imgur.com/TJuk44x.jpg",
+        "https://i.imgur.com/3jIgvE6.png",
+        "https://i.imgur.com/sYxJqfg.png",
+        "https://i.imgur.com/oz4rlRj.png",
+        "https://garfield-is-a.lasagna.cat/i/5kx4.png",
+        "https://i.imgur.com/QsL2mQM.png"]
+
 
 class Fun(slash_util.Cog):
     def __init__(self, bot):
@@ -192,6 +208,12 @@ class Fun(slash_util.Cog):
         embed = discord.Embed(title=f"{ctx.author.display_name} pats {member.display_name}")
         embed.set_image(url=resp['url'])
         await ctx.send(embed=embed)
+
+    @slash_util.slash_command()
+    async def bait(self, ctx: slash_util.Context):
+        """Sends a random bait image"""
+        l = random.choice(BAIT)
+        await ctx.send(l)
 
 def setup(bot):
     bot.add_cog(Fun(bot))
