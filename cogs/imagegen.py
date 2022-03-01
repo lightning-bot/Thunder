@@ -32,13 +32,16 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+from __future__ import annotations
+
 import io
+import textwrap
 from typing import TYPE_CHECKING
+
 import discord
 import slash_util
 from jishaku.functools import executor_function
 from PIL import Image, ImageDraw, ImageFont
-import textwrap
 
 if TYPE_CHECKING:
     from typing import Union
