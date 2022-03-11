@@ -39,19 +39,22 @@ import textwrap
 from typing import TYPE_CHECKING
 
 import discord
-import slash_util
+from discord import app_commands
+from discord.ext import commands
 from jishaku.functools import executor_function
 from PIL import Image, ImageDraw, ImageFont
 
 if TYPE_CHECKING:
     from typing import Union
 
-class ImageGen(slash_util.Cog):
+class ImageGen(commands.Cog):
     """
     Image generation that isn't using an API.
     
     All commands here have been ported from Lightning under the AGPLv3 license. (https://gitlab.com/lightning-bot/Lightning)
     """
+    def __init__(self, bot) -> None:
+        self.bot = bot
     
     @executor_function
     def make_lakitu(self, text: str) -> io.BytesIO:
@@ -75,12 +78,12 @@ class ImageGen(slash_util.Cog):
         finalbuffer.seek(0)
         return finalbuffer
 
-    @slash_util.slash_command()
-    async def lakitufyi(self, ctx: slash_util.Context, text: str) -> None:
+    @app_commands.command()
+    async def lakitufyi(self, interaction: discord.Interaction, text: str) -> None:
         """Makes a Lakitu FYI meme with your own text"""
-        await ctx.defer()
+        await interaction.response.defer()
         image_buffer = await self.make_lakitu(text)
-        await ctx.send(file=discord.File(image_buffer, filename="fyi.png"))
+        await interaction.followup.send(file=discord.File(image_buffer, filename="fyi.png"))
 
     @executor_function
     def make_kcdt(self, text: str) -> io.BytesIO:
@@ -105,15 +108,15 @@ class ImageGen(slash_util.Cog):
         finalbuffer.seek(0)
         return finalbuffer
 
-    @slash_util.slash_command()
-    async def kurisudraw(self, ctx: slash_util.Context, text: str) -> None:
+    @app_commands.command()
+    async def kurisudraw(self, interaction: discord.Interaction, text: str) -> None:
         """Kurisu can solve this, can you?"""
-        await ctx.defer()
+        await interaction.response.defer()
         img_buff = await self.make_kcdt(text)
-        await ctx.send(file=discord.File(img_buff, filename="kurisudraw.png"))
+        await interaction.followup.send(file=discord.File(img_buff, filename="kurisudraw.png"))
 
     async def get_user_avatar(self, user: Union[discord.User, discord.Member]) -> bytes:
-        async with self.bot.aiosession.get(user.avatar.with_format("png").url) as resp:
+        async with self.bot.session.get(user.avatar.with_format("png").url) as resp:
             avy_bytes = await resp.read()
         return avy_bytes
 
@@ -136,39 +139,39 @@ class ImageGen(slash_util.Cog):
 
         return buffer
 
-    @slash_util.slash_command()
-    @slash_util.describe(member="The member to use. If member is not provided, it uses the author.")
+    @app_commands.command()
+    @app_commands.describe(member="The member to use. If member is not provided, it uses the author.")
     # @commands.cooldown(2, 60.0, commands.BucketType.guild)
-    async def screwedup(self, ctx: slash_util.Context, member: discord.Member = None) -> None:
+    async def screwedup(self, interaction: discord.Interaction, member: discord.Member = None) -> None:
         """Miko Iino tells you that you are screwed up in the head"""
         if member is None:
-            member = ctx.author
+            member = interaction.user
 
         if member.id in [376012343777427457, self.bot.user.id]:
             return  # :mystery:
 
-        await ctx.defer()
+        await interaction.response.defer()
         avy = await self.get_user_avatar(member)
         image_buffer = await self.make_circle_related_meme(avy, "assets/templates/inthehead.png", (64, 64),
                                                            (14, 43))
-        await ctx.send(file=discord.File(image_buffer, "screwedupinthehead.png"))
+        await interaction.followup.send(file=discord.File(image_buffer, "screwedupinthehead.png"))
 
-    @slash_util.slash_command()
-    @slash_util.describe(member="The member to use. If member is not provided, it uses the author.")
+    @app_commands.command()
+    @app_commands.describe(member="The member to use. If member is not provided, it uses the author.")
     # @commands.cooldown(2, 60.0, commands.BucketType.guild)
-    async def iq(self, ctx: slash_util.Context, member: discord.Member = None) -> None:
+    async def iq(self, interaction: discord.Interaction, member: discord.Member = None) -> None:
         """Your iq is 3"""
         if member is None:
-            member = ctx.author
+            member = interaction.user
 
         if member.id in [376012343777427457, self.bot.user.id]:
             return  # :mystery:
 
-        await ctx.defer()
+        await interaction.response.defer()
         avy = await self.get_user_avatar(member)
         image_buffer = await self.make_circle_related_meme(avy, "assets/templates/fujiwara-iq.png", (165, 165),
                                                            (140, 26))
-        await ctx.send(file=discord.File(image_buffer, "huh_my_iq_is.png"))
+        await interaction.followup.send(file=discord.File(image_buffer, "huh_my_iq_is.png"))
 
 
 def setup(bot):

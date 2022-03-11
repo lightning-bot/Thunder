@@ -19,7 +19,7 @@ import logging
 
 import aiohttp
 import discord
-import slash_util
+from discord.ext.commands import Bot
 
 import config
 
@@ -30,12 +30,22 @@ cogs = ['jishaku',
         'cogs.stats',
         'cogs.imagegen']
 
-class Thunder(slash_util.Bot):
+class Thunder(Bot):
     def __init__(self):
-        super().__init__(command_prefix=['t!'], allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+        super().__init__(command_prefix=['t!'], allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
+                         intents=discord.Intents(messages=True, members=True, guilds=True))
         self.session: aiohttp.ClientSession = aiohttp.ClientSession()
         for cog in cogs:
             self.load_extension(cog)
+
+        self.ready_fired = False
+
+    async def on_ready(self):
+        if self.ready_fired:
+            return
+
+        self.ready_fired = True
+        await self.tree.sync()
 
 
 if __name__ == '__main__':

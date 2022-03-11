@@ -16,13 +16,13 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import discord
-import slash_util
+from discord import app_commands
 from discord.ext import commands
 
 import config
 
 
-class Stats(slash_util.Cog):
+class Stats(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
@@ -52,11 +52,11 @@ class Stats(slash_util.Cog):
         channel = self.bot.get_channel(config.GUILD_STATUS_CHANNEL)
         await channel.send(embed=embed)
 
-    @slash_util.slash_command()
-    async def about(self, ctx: slash_util.Context):
+    @app_commands.command()
+    async def about(self, interaction: discord.Interaction):
         """Tells you information about this bot"""
-        await ctx.send("Thunder, a companion bot to Lightning. This bot is open source and can be found at "
-                       "<https://gitlab.com/lightning-bot/thunder>")
+        await interaction.response.send_message("Thunder, a companion bot to Lightning. This bot is open source and can be found at "
+                                                "<https://gitlab.com/lightning-bot/thunder>")
 
 def setup(bot):
     bot.add_cog(Stats(bot))
