@@ -208,6 +208,24 @@ class Fun(commands.Cog):
         await interaction.followup.send(embed=embed)
 
     @app_commands.command()
+    async def lolice(self, interaction: discord.Interaction, user: discord.User) -> None:
+        """Lolice chief"""
+        await interaction.response.defer()
+        data = await self.make_json_request(interaction, f'https://nekobot.xyz/api/imagegen?type=lolice&url={user.avatar.with_format("png")}')
+        embed = discord.Embed()
+        embed.set_image(url=data['message'])
+        await interaction.followup.send(embed=embed)
+
+    @app_commands.command()
+    async def awooify(self, interaction: discord.Interaction, user: discord.User) -> None:
+        """Awooify a user"""
+        await interaction.response.defer()
+        data = await self.make_json_request(interaction, f'https://nekobot.xyz/api/imagegen?type=awooify&url={user.avatar.with_format("png")}')
+        embed = discord.Embed()
+        embed.set_image(url=data['message'])
+        await interaction.followup.send(embed=embed)
+
+    @app_commands.command()
     async def bait(self, interaction: discord.Interaction):
         """Sends a random bait image"""
         await interaction.response.send_message(random.choice(BAIT))
