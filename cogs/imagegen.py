@@ -174,5 +174,5 @@ class ImageGen(commands.Cog):
         await interaction.followup.send(file=discord.File(image_buffer, "huh_my_iq_is.png"))
 
 
-def setup(bot):
-    bot.add_cog(ImageGen(bot))
+async def setup(bot):
+    await bot.add_cog(ImageGen(bot))

@@ -241,6 +241,6 @@ async def mock(interaction: discord.Interaction, message: discord.Message):
     await interaction.response.send_message(discord.utils.escape_mentions("".join(m)))
 
 
-def setup(bot):
-    bot.add_cog(Fun(bot))
+async def setup(bot):
+    await bot.add_cog(Fun(bot))
     bot.tree.add_command(mock)

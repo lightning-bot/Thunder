@@ -28,17 +28,20 @@ logging.basicConfig(level="INFO")
 cogs = ['jishaku',
         'cogs.fun',
         'cogs.stats',
-        'cogs.imagegen']
+        'cogs.imagegen',
+        'cogs.api']
 
 class Thunder(Bot):
     def __init__(self):
         super().__init__(command_prefix=['t!'], allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
                          intents=discord.Intents(messages=True, members=True, guilds=True))
-        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
-        for cog in cogs:
-            self.load_extension(cog)
-
         self.ready_fired = False
+
+    async def setup_hook(self):
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession()
+
+        for cog in cogs:
+            await self.load_extension(cog)
 
     async def on_ready(self):
         if self.ready_fired:

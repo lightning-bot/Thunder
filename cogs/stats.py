@@ -58,5 +58,5 @@ class Stats(commands.Cog):
         await interaction.response.send_message("Thunder, a companion bot to Lightning. This bot is open source and can be found at "
                                                 "<https://gitlab.com/lightning-bot/thunder>")
 
-def setup(bot):
-    bot.add_cog(Stats(bot))
+async def setup(bot):
+    await bot.add_cog(Stats(bot))
