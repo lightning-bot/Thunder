@@ -29,7 +29,8 @@ cogs = ['jishaku',
         'cogs.fun',
         'cogs.stats',
         'cogs.imagegen',
-        'cogs.api']
+        'cogs.api',
+        'cogs.emoji']
 
 class Thunder(Bot):
     def __init__(self):
