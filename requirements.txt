@@ -3,3 +3,4 @@ jishaku
 pillow-SIMD
 rapidfuzz
 bottomify
+slowo

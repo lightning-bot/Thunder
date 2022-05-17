@@ -22,6 +22,7 @@ from datetime import datetime
 from typing import Literal
 
 import bottom
+import slowo
 import discord
 import yarl
 from discord import app_commands
@@ -237,6 +238,21 @@ class Fun(commands.Cog):
         """Turns text into bottom"""
         await interaction.response.send_message(bottom.encode(text))
 
+    @app_commands.command()
+    @app_commands.describe(text="The test to owoify")
+    async def owoify(self, interaction: discord.Interaction, text: str) -> None:
+        """Turns a message into owo-speak"""
+        await interaction.response.send_message(slowo.UwU.ify(text))
+
+
+@app_commands.context_menu(name='Owoify')
+async def owoify(interaction: discord.Interaction, message: discord.Message) -> None:
+    if not message.content:
+        await interaction.response.send_message("This message has no content I can get...", ephemeral=True)
+        return
+
+    await interaction.response.send_message(slowo.UwU.ify(message.content))
+
 
 @app_commands.context_menu(name="Mock")
 async def mock(interaction: discord.Interaction, message: discord.Message):
@@ -251,3 +267,4 @@ async def mock(interaction: discord.Interaction, message: discord.Message):
 async def setup(bot):
     await bot.add_cog(Fun(bot))
     bot.tree.add_command(mock)
+    bot.tree.add_command(owoify)
