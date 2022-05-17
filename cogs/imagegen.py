@@ -35,8 +35,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import io
+import random
 import textwrap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 import discord
 from discord import app_commands
@@ -44,8 +45,6 @@ from discord.ext import commands
 from jishaku.functools import executor_function
 from PIL import Image, ImageDraw, ImageFont
 
-if TYPE_CHECKING:
-    from typing import Union
 
 class ImageGen(commands.Cog):
     """
@@ -172,6 +171,28 @@ class ImageGen(commands.Cog):
         image_buffer = await self.make_circle_related_meme(avy, "assets/templates/fujiwara-iq.png", (165, 165),
                                                            (140, 26))
         await interaction.followup.send(file=discord.File(image_buffer, "huh_my_iq_is.png"))
+
+    @executor_function
+    def make_jpegify(self, _bytes: bytes) -> io.BytesIO:
+        img = Image.open(io.BytesIO(_bytes))
+
+        buff = io.BytesIO()
+        img.convert("RGB").save(buff, "jpeg", quality=random.randrange(1, 10))
+        buff.seek(0)
+
+        return buff
+
+    @app_commands.command()
+    @app_commands.describe(image="The image to convert to jpeg")
+    async def needsmorejpeg(self, interaction: discord.Interaction, image: discord.Attachment) -> None:
+        """Jpegify an image"""
+        await interaction.response.defer()
+
+        async with self.bot.session.get(image.url) as resp:
+            byte_data = await resp.read()
+        image_buffer = await self.make_jpegify(byte_data)
+
+        await interaction.followup.send(file=discord.File(image_buffer, filename="jpegify.jpeg"))
 
 
 async def setup(bot):

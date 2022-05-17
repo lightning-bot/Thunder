@@ -19,7 +19,7 @@ import logging
 
 import aiohttp
 import discord
-from discord.ext.commands import Bot
+from discord.ext.commands import Bot, when_mentioned_or
 
 import config
 
@@ -34,7 +34,7 @@ cogs = ['jishaku',
 
 class Thunder(Bot):
     def __init__(self):
-        super().__init__(command_prefix=['t!'], allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
+        super().__init__(command_prefix=when_mentioned_or('t!'), allowed_mentions=discord.AllowedMentions(everyone=False, roles=False),
                          intents=discord.Intents(messages=True, members=True, guilds=True))
         self.ready_fired = False
 

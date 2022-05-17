@@ -21,6 +21,7 @@ import random
 from datetime import datetime
 from typing import Literal
 
+import bottom
 import discord
 import yarl
 from discord import app_commands
@@ -229,6 +230,12 @@ class Fun(commands.Cog):
     async def bait(self, interaction: discord.Interaction):
         """Sends a random bait image"""
         await interaction.response.send_message(random.choice(BAIT))
+
+    @app_commands.command()
+    @app_commands.describe(text="The text to bottomify")
+    async def bottomify(self, interaction: discord.Interaction, text: str):
+        """Turns text into bottom"""
+        await interaction.response.send_message(bottom.encode(text))
 
 
 @app_commands.context_menu(name="Mock")
