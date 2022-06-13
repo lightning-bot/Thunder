@@ -49,6 +49,7 @@ class Thunder(Bot):
             return
 
         self.ready_fired = True
+        # This is generally a bad idea...
         await self.tree.sync()
 
 
