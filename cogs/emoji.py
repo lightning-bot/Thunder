@@ -29,7 +29,7 @@ class Emoji(commands.Cog):
     @app_commands.describe(emoji="The emoji to find")
     async def nitro(self, interaction: discord.Interaction, emoji: str):
         """You know what this is"""
-        await interaction.response.send_message(f"<:_:{int(emoji)}")
+        await interaction.response.send_message(f"<:_:{int(emoji)}>")
 
     @nitro.autocomplete('emoji')
     async def nitro_autocomplete(self, _: discord.Interaction, string: str):
