@@ -23,6 +23,8 @@ import config
 
 
 class Stats(commands.Cog):
+    def __init__(self, bot) -> None:
+        self.bot = bot
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
@@ -56,7 +58,8 @@ class Stats(commands.Cog):
     async def about(self, interaction: discord.Interaction):
         """Tells you information about this bot"""
         await interaction.response.send_message("Thunder, a companion bot to Lightning. This bot is open source and can be found at "
-                                                "<https://gitlab.com/lightning-bot/thunder>")
+                                                "<https://github.com/lightning-bot/Thunder>")
+
 
 async def setup(bot):
     await bot.add_cog(Stats(bot))
