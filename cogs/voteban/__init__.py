@@ -22,12 +22,14 @@ from typing import TYPE_CHECKING
 import discord
 from discord import app_commands
 from discord.ext.commands import GroupCog
+from tortoise import Tortoise
+
+import config
+
+from .models import VoteBanBallots, VoteBanCandidates
 
 if TYPE_CHECKING:
     from main import Thunder
-
-
-# guild_id: {member_to_ban: {voters: []}} NO PK
 
 
 class VoteButton(discord.ui.Button['VoteBanView']):
@@ -48,33 +50,39 @@ class VoteButton(discord.ui.Button['VoteBanView']):
             await interaction.followup.send("Removed your vote!", ephemeral=True)
             return
 
-        await self.view.add_vote(interaction.user)
+        await self.view.add_vote(interaction.user.id)
 
         await interaction.response.edit_message(content=f"{fmt} ({self.view.vote_count} voters)")
 
 
 class VoteBanView(discord.ui.View):
-    def __init__(self, member: discord.Member):
+    def __init__(self, member: discord.Member, cand_id: int):
         super().__init__(timeout=None)
         self.member = member  # member to ban
         self.voters = []
+        self.cand_id = cand_id
         self.add_item(VoteButton(self, emoji="<:voted:649356870376488991>"))
 
     @classmethod
-    def from_database(cls, record):
-        cls = cls(record['member'])
-        cls.voters = record['voters']
+    async def from_database(cls, record: VoteBanCandidates):
+        cls = cls(record.member, record.id)
+        cls.voters = [v.voter_id for v in await record.voters.all()]
         return cls
 
     @property
     def vote_count(self):
         return len(self.voters)
 
-    async def add_vote(self, user: discord.Member):
-        self.voters.append(user.id)
+    async def add_vote(self, user_id: int):
+        await VoteBanBallots.create(ballot_id=self.cand_id, voter_id=user_id)
+        self.voters.append(user_id)
 
     async def remove_vote(self, user_id: int):
-        self.voters.remove(user_id)
+        ballot = await VoteBanBallots.get_or_none(ballot_id=self.cand_id,
+                                                  voter_id=user_id)
+        if ballot:
+            self.voters.remove(ballot.voter_id)
+            await ballot.delete()
 
 
 class VoteBan(GroupCog, name="voteban"):
@@ -83,20 +91,26 @@ class VoteBan(GroupCog, name="voteban"):
         super().__init__()
         self.bot: Thunder = bot
 
-    async def cog_load(self) -> None:
-        ...
+    def cog_load(self) -> None:
+        self.bot.loop.create_task(self.init_existing_views())
 
     async def init_existing_views(self):
         # somewhere we fetch views
-        objs = []
-        for obj in objs:
-            self.bot.add_view(VoteBanView.from_database(obj))
+        await self.bot.wait_until_ready()
+
+        async for model in VoteBanCandidates.all():
+            guild = self.bot.get_guild(model.guild_id)
+            if not guild:
+                continue
+            setattr(model, 'member', guild.get_member(model.user_id))
+            self.bot.add_view(await VoteBanView.from_database(model))
 
     @app_commands.command(name="new")
     @app_commands.describe(member="The member to voteban")
     async def new(self, interaction: discord.Interaction, member: discord.Member):
         """Starts a new vote to ban someone"""
-        await interaction.response.send_message("Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member))
+        cand_id = await VoteBanCandidates.create(guild_id=interaction.guild.id, user_id=member.id)
+        await interaction.response.send_message("Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member, cand_id.id))
 
     @app_commands.command(name="max-votes")
     async def max_votes(self, interaction: discord.Interaction, votes: int):
@@ -104,5 +118,12 @@ class VoteBan(GroupCog, name="voteban"):
         ...
 
 
-async def setup(bot):
+async def setup(bot: Thunder):
+    await Tortoise.init(db_url=config.DB_URL, modules={'models': ['cogs.voteban.models']})
+    await Tortoise.generate_schemas(safe=True)
+
     await bot.add_cog(VoteBan(bot))
+
+
+async def teardown(bot: Thunder):
+    await Tortoise.close_connections()
