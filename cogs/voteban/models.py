@@ -14,7 +14,7 @@ class VoteBanCandidates(Model):
 
 
 class VoteBanBallots(Model):
-    ballot = fields.ForeignKeyField('models.VoteBanCandidates', related_name='voters', to_field="id")
+    candidate = fields.ForeignKeyField('models.VoteBanCandidates', related_name='voters', to_field="id")
     voter_id = fields.BigIntField()  # really it's the user's id
 
     class Meta:

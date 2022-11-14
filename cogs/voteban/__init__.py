@@ -74,11 +74,11 @@ class VoteBanView(discord.ui.View):
         return len(self.voters)
 
     async def add_vote(self, user_id: int):
-        await VoteBanBallots.create(ballot_id=self.cand_id, voter_id=user_id)
+        await VoteBanBallots.create(candidate_id=self.cand_id, voter_id=user_id)
         self.voters.append(user_id)
 
     async def remove_vote(self, user_id: int):
-        ballot = await VoteBanBallots.get_or_none(ballot_id=self.cand_id,
+        ballot = await VoteBanBallots.get_or_none(candidate_id=self.cand_id,
                                                   voter_id=user_id)
         if ballot:
             self.voters.remove(ballot.voter_id)
@@ -95,7 +95,6 @@ class VoteBan(GroupCog, name="voteban"):
         self.bot.loop.create_task(self.init_existing_views())
 
     async def init_existing_views(self):
-        # somewhere we fetch views
         await self.bot.wait_until_ready()
 
         async for model in VoteBanCandidates.all():
