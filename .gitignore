@@ -116,3 +116,7 @@ dmypy.json
 
 # Config
 config.py
+
+# sqlite
+*.sqlite3-shm
+*.sqlite3-wal
