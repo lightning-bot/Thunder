@@ -21,3 +21,11 @@ class VoteBanBallots(Model):
 
     class Meta:
         table = "voteban_ballots"
+
+
+class VoteBanConfig(Model):
+    guild_id = fields.BigIntField(pk=True)
+    vote_count = fields.IntField()
+
+    class Meta:
+        table = "voteban_config"

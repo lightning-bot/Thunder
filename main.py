@@ -15,22 +15,20 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import logging
-
 import aiohttp
 import discord
 from discord.ext.commands import Bot, when_mentioned_or
 
 import config
 
-logging.basicConfig(level="INFO")
-
 cogs = ['jishaku',
         'cogs.fun',
         'cogs.stats',
         'cogs.imagegen',
         'cogs.api',
-        'cogs.emoji']
+        'cogs.emoji',
+        'cogs.voteban']
+
 
 class Thunder(Bot):
     def __init__(self):

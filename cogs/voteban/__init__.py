@@ -26,7 +26,7 @@ from tortoise import Tortoise
 
 import config
 
-from .models import VoteBanBallots, VoteBanCandidates
+from .models import VoteBanBallots, VoteBanCandidates, VoteBanConfig
 
 if TYPE_CHECKING:
     from main import Thunder
@@ -151,7 +151,7 @@ class VoteBan(GroupCog, name="voteban"):
             if not guild:
                 continue
             setattr(model, 'member', guild.get_member(model.user_id))
-            self.bot.add_view(await VoteBanView.from_database(model))
+            self.bot.add_view(await VoteBanView.from_database(model), message_id=model.message_id)
 
     @app_commands.command(name="new")
     @app_commands.describe(member="The member to voteban", pin="Whether to pin the message to the channel's pins")
@@ -170,22 +170,26 @@ class VoteBan(GroupCog, name="voteban"):
             await m.save()
 
         model = await VoteBanCandidates.create(guild_id=interaction.guild.id, user_id=member.id)
+        config = await VoteBanConfig.get_or_create(guild_id=interaction.guild.id, vote_count=5)
+
         if interaction.response.is_done():
             await interaction.original_message()
             resp = interaction.edit_original_message
         else:
             resp = interaction.response.send_message
 
-        await resp(content="Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member, model))
+        await resp(content="Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member, model, config[0].vote_count))
 
         message = await interaction.original_message()
         model.message_id = message.id
         await model.save()
 
     @app_commands.command(name="max-votes")
-    async def max_votes(self, interaction: discord.Interaction, votes: int):
+    @app_commands.default_permissions(manage_guild=True)
+    async def max_votes(self, interaction: discord.Interaction, votes: int = 5):
         """Allows you to configure how many votes are required for a vote ban"""
-        ...
+        await VoteBanConfig.update_or_create(guild_id=interaction.guild.id, vote_count=votes)
+        await interaction.response.send_message("Updated the config!\n> Please note any ongoing vote bans are still using the old value!")
 
 
 async def setup(bot: Thunder):
