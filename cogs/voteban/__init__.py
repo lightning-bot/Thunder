@@ -184,9 +184,12 @@ class VoteBan(GroupCog, name="voteban"):
         model.message_id = message.id
         await model.save()
 
+        if pin:
+            await message.pin()
+
     @app_commands.command(name="max-votes")
     @app_commands.default_permissions(manage_guild=True)
-    async def max_votes(self, interaction: discord.Interaction, votes: int = 5):
+    async def max_votes(self, interaction: discord.Interaction, votes: app_commands.Range[int, 3, 50] = 5):
         """Allows you to configure how many votes are required for a vote ban"""
         await VoteBanConfig.update_or_create(guild_id=interaction.guild.id, vote_count=votes)
         await interaction.response.send_message("Updated the config!\n> Please note any ongoing vote bans are still using the old value!")
