@@ -4,3 +4,4 @@ pillow-SIMD
 rapidfuzz
 bottomify
 slowo
+tortoise-orm==0.19.2
