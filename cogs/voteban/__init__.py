@@ -173,14 +173,14 @@ class VoteBan(GroupCog, name="voteban"):
         config = await VoteBanConfig.get_or_create({"vote_count": 5}, guild_id=interaction.guild.id)
 
         if interaction.response.is_done():
-            await interaction.original_message()
-            resp = interaction.edit_original_message
+            await interaction.original_response()
+            resp = interaction.edit_original_response
         else:
             resp = interaction.response.send_message
 
         await resp(content="Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member, model, config[0].vote_count))
 
-        message = await interaction.original_message()
+        message = await interaction.original_response()
         model.message_id = message.id
         await model.save()
 
