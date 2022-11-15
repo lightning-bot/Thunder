@@ -170,7 +170,7 @@ class VoteBan(GroupCog, name="voteban"):
             await m.save()
 
         model = await VoteBanCandidates.create(guild_id=interaction.guild.id, user_id=member.id)
-        config = await VoteBanConfig.get_or_create(guild_id=interaction.guild.id, vote_count=5)
+        config = await VoteBanConfig.get_or_create({"vote_count": 5}, guild_id=interaction.guild.id)
 
         if interaction.response.is_done():
             await interaction.original_message()
