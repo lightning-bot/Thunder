@@ -6,6 +6,8 @@ class VoteBanCandidates(Model):
     id = fields.IntField(pk=True)
     guild_id = fields.BigIntField()
     user_id = fields.BigIntField()
+    message_id = fields.BigIntField(null=True)
+    active = fields.BooleanField(default=True)
 
     voters: fields.ReverseRelation["VoteBanBallots"]
 

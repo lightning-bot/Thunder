@@ -50,22 +50,29 @@ class VoteButton(discord.ui.Button['VoteBanView']):
             await interaction.followup.send("Removed your vote!", ephemeral=True)
             return
 
-        await self.view.add_vote(interaction.user.id)
+        try:
+            await self.view.add_vote(interaction.user.id)
+        except discord.HTTPException as e:
+            await interaction.response.edit_message(content=f"Failed to ban {self.member} for {e}! Closing...")
+            self.view.stop()
 
         await interaction.response.edit_message(content=f"{fmt} ({self.view.vote_count} voters)")
 
 
 class VoteBanView(discord.ui.View):
-    def __init__(self, member: discord.Member, cand_id: int):
+    def __init__(self, member: discord.Member, model: VoteBanCandidates, max_votes: int = 5):
         super().__init__(timeout=None)
         self.member = member  # member to ban
         self.voters = []
-        self.cand_id = cand_id
+        self.model = model
+        self.max_votes = max_votes
         self.add_item(VoteButton(self, emoji="<:voted:649356870376488991>"))
+
+        self.view_voters_button.custom_id = f"thunder-vote-ban-voters-{member.guild.id}-{member.id}"
 
     @classmethod
     async def from_database(cls, record: VoteBanCandidates):
-        cls = cls(record.member, record.id)
+        cls = cls(record.member, record)
         cls.voters = [v.voter_id for v in await record.voters.all()]
         return cls
 
@@ -73,16 +80,58 @@ class VoteBanView(discord.ui.View):
     def vote_count(self):
         return len(self.voters)
 
+    async def ban(self):
+        self.model.active = False
+        await self.model.save(update_fields=['active'])
+
+        await self.member.ban(delete_message_days=0, reason="Votebanned")
+        self.stop()
+
     async def add_vote(self, user_id: int):
-        await VoteBanBallots.create(candidate_id=self.cand_id, voter_id=user_id)
+        await VoteBanBallots.create(candidate_id=self.model.id, voter_id=user_id)
         self.voters.append(user_id)
 
+        if self.vote_count >= self.max_votes:
+            await self.ban()
+
     async def remove_vote(self, user_id: int):
-        ballot = await VoteBanBallots.get_or_none(candidate_id=self.cand_id,
+        ballot = await VoteBanBallots.get_or_none(candidate_id=self.model.id,
                                                   voter_id=user_id)
         if ballot:
             self.voters.remove(ballot.voter_id)
             await ballot.delete()
+
+    @discord.ui.button(label="View Votes", row=2, style=discord.ButtonStyle.blurple)
+    async def view_voters_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.voters:
+            content = "\n".join(f"<@!{id}>" for id in self.voters)
+        else:
+            content = "Nobody has voted yet!"
+
+        await interaction.response.send_message(content=content,
+                                                ephemeral=True)
+
+
+class ConfirmView(discord.ui.View):
+    def __init__(self, interaction: discord.Interaction, *, timeout=60):
+        super().__init__(timeout=timeout)
+        self.status = None
+        self.member = interaction.user
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        return self.member.id == interaction.user.id
+
+    @discord.ui.button(emoji="<:greenTick:613702930444451880>")
+    async def yes_button(self, itx: discord.Interaction, button: discord.ui.Button):
+        self.status = True
+        await itx.response.edit_message()
+        self.stop()
+
+    @discord.ui.button(emoji="<:redTick:613703043283681290>")
+    async def no_button(self, itx: discord.Interaction, button: discord.ui.Button):
+        self.status = False
+        await itx.response.edit_message()
+        self.stop()
 
 
 class VoteBan(GroupCog, name="voteban"):
@@ -97,7 +146,7 @@ class VoteBan(GroupCog, name="voteban"):
     async def init_existing_views(self):
         await self.bot.wait_until_ready()
 
-        async for model in VoteBanCandidates.all():
+        async for model in VoteBanCandidates.filter(active=True):
             guild = self.bot.get_guild(model.guild_id)
             if not guild:
                 continue
@@ -105,11 +154,33 @@ class VoteBan(GroupCog, name="voteban"):
             self.bot.add_view(await VoteBanView.from_database(model))
 
     @app_commands.command(name="new")
-    @app_commands.describe(member="The member to voteban")
-    async def new(self, interaction: discord.Interaction, member: discord.Member):
+    @app_commands.describe(member="The member to voteban", pin="Whether to pin the message to the channel's pins")
+    async def new(self, interaction: discord.Interaction, member: discord.Member, pin: bool = False):
         """Starts a new vote to ban someone"""
-        cand_id = await VoteBanCandidates.create(guild_id=interaction.guild.id, user_id=member.id)
-        await interaction.response.send_message("Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member, cand_id.id))
+        m = await VoteBanCandidates.get_or_none(guild_id=interaction.guild.id, user_id=member.id, active=True)
+        if m:
+            view = ConfirmView(interaction)
+            await interaction.response.send_message("There is already a voteban going on! Do you want to start a new one?", view=view)
+            await view.wait()
+
+            if view.status is not True:
+                return
+
+            m.active = False
+            await m.save()
+
+        model = await VoteBanCandidates.create(guild_id=interaction.guild.id, user_id=member.id)
+        if interaction.response.is_done():
+            await interaction.original_message()
+            resp = interaction.edit_original_message
+        else:
+            resp = interaction.response.send_message
+
+        await resp(content="Click the <:voted:649356870376488991> button to vote!", view=VoteBanView(member, model))
+
+        message = await interaction.original_message()
+        model.message_id = message.id
+        await model.save()
 
     @app_commands.command(name="max-votes")
     async def max_votes(self, interaction: discord.Interaction, votes: int):
