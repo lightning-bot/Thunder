@@ -19,14 +19,18 @@ import io
 import math
 import random
 from datetime import datetime
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import bottom
-import slowo
 import discord
+import slowo
 import yarl
 from discord import app_commands
 from discord.ext import commands
+
+if TYPE_CHECKING:
+    from main import Thunder
+
 
 MAX_CHILL_TEMP = -50
 MAX_WARM_TEMP = 100
@@ -49,7 +53,7 @@ BAIT = ["https://i.imgur.com/5VKDzO6.png",
 
 class Fun(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Thunder = bot
         self.temp_cache = {}  # user_id: temperature (in C)
 
     @app_commands.command()
@@ -150,9 +154,9 @@ class Fun(commands.Cog):
         req = await self.bot.session.get(url)
 
         if req.status != 200:
-            await interaction.followup.send(f"Sorry, this command is not working. Try again later(?)")
+            await interaction.followup.send("Sorry, this command is not working. Try again later(?)")
             return
-        
+
         return await req.json()
 
     @app_commands.command()
