@@ -25,7 +25,6 @@ cogs = ['jishaku',
         'cogs.fun',
         'cogs.stats',
         'cogs.imagegen',
-        'cogs.api',
         'cogs.emoji',
         'cogs.voteban']
 
@@ -47,8 +46,6 @@ class Thunder(Bot):
             return
 
         self.ready_fired = True
-        # This is generally a bad idea...
-        await self.tree.sync()
 
 
 if __name__ == '__main__':
