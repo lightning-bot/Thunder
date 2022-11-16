@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 class VoteButton(discord.ui.Button['VoteBanView']):
     def __init__(self, view: 'VoteBanView', *, emoji):
-        super().__init__(emoji=emoji, custom_id=f"thunder-voteban-view-{view.member.guild.id}-{view.member.id}")
+        super().__init__(emoji=emoji, custom_id=f"thunder-voteban-view-{view.member.guild.id}-{view.model.id}")
         self._view = view
         assert self.view is not None
 
@@ -53,7 +53,7 @@ class VoteButton(discord.ui.Button['VoteBanView']):
         try:
             await self.view.add_vote(interaction.user.id)
         except discord.HTTPException as e:
-            await interaction.response.edit_message(content=f"Failed to ban {self.member} for {e}! Closing...")
+            await interaction.response.edit_message(content=f"Failed to ban {self.member} for {e}! Closed voteban!", view=None)
             self.view.stop()
 
         await interaction.response.edit_message(content=f"{fmt} ({self.view.vote_count} voters)")
@@ -68,7 +68,7 @@ class VoteBanView(discord.ui.View):
         self.max_votes = max_votes
         self.add_item(VoteButton(self, emoji="<:voted:649356870376488991>"))
 
-        self.view_voters_button.custom_id = f"thunder-vote-ban-voters-{member.guild.id}-{member.id}"
+        self.view_voters_button.custom_id = f"thunder-vote-ban-voters-{member.guild.id}-{model.id}"
 
     @classmethod
     async def from_database(cls, record: VoteBanCandidates):
