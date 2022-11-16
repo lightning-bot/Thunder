@@ -168,6 +168,8 @@ class VoteBan(GroupCog, name="voteban"):
 
             m.active = False
             await m.save()
+            if view := discord.utils.get(self.bot.persistent_views, model__id=m.id):
+                view.stop()
 
         model = await VoteBanCandidates.create(guild_id=interaction.guild.id, user_id=member.id)
         config = await VoteBanConfig.get_or_create({"vote_count": 5}, guild_id=interaction.guild.id)
