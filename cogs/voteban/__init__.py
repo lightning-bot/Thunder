@@ -134,6 +134,7 @@ class ConfirmView(discord.ui.View):
         self.stop()
 
 
+@app_commands.guild_only()
 class VoteBan(GroupCog, name="voteban"):
     """The voteban commands"""
     def __init__(self, bot: Thunder) -> None:
