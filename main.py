@@ -26,7 +26,8 @@ cogs = ['jishaku',
         'cogs.stats',
         'cogs.imagegen',
         'cogs.emoji',
-        'cogs.voteban']
+        'cogs.voteban',
+        'cogs.memes']
 
 
 class Thunder(Bot):
