@@ -21,7 +21,6 @@ import random
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal
 
-import bottom
 import discord
 import slowo
 import yarl
@@ -237,16 +236,23 @@ class Fun(commands.Cog):
         await interaction.response.send_message(random.choice(BAIT))
 
     @app_commands.command()
-    @app_commands.describe(text="The text to bottomify")
-    async def bottomify(self, interaction: discord.Interaction, text: str):
-        """Turns text into bottom"""
-        await interaction.response.send_message(bottom.encode(text))
-
-    @app_commands.command()
     @app_commands.describe(text="The test to owoify")
     async def owoify(self, interaction: discord.Interaction, text: str) -> None:
         """Turns a message into owo-speak"""
         await interaction.response.send_message(slowo.UwU.ify(text))
+
+    @app_commands.command()
+    @app_commands.describe(text="The type of server")
+    async def roleplay(self, interaction: discord.Interaction, text: str = "furry"):
+        """Generates a personalized end-of-year server message"""
+        tmp = "Hey guys, just wanted to wish you all happy holidays. "\
+              "Discord is filled with ready-made messages that you don't even read, "\
+              "you just copy and paste to every server, I don't like that, I like "\
+              "writing from my heart. Our friendship, from the deepest to virtual, "\
+              "is very important to me and couldn't ever be represented by a "\
+              "cookie-cutter message from anywhere. So, I'd like to thank you all, "\
+              f"you're the best {text} roleplaying server I've ever interacted with."
+        await interaction.response.send_message(tmp)
 
 
 @app_commands.context_menu(name='Owoify')
